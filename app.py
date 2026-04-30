@@ -39,7 +39,7 @@ if not st.session_state.logged_in:
 
 st.sidebar.write("Logged in as:")
 st.sidebar.success(st.session_state.username)
-paid_users = ["katya"]
+paid_users = ["demo"]
 
 if st.session_state.username not in paid_users:
     st.error("Subscription required.")
