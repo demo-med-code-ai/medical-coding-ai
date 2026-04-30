@@ -1,19 +1,21 @@
+
+
 import streamlit as st
 from datetime import datetime
 from transformers import pipeline
 
 import pandas as pd
 
+st.info("This is a beta AI-assisted coding tool. Do NOT enter real patient information. Results are for educational/demo purposes only.")
+
 st.set_page_config(page_title="Medical Coding AI", layout="wide")
 
 st.title("Medical Coding AI")
-st.write("AI-assisted ICD-10 suggestions for clinical notes")
+st.caption("AI-assisted ICD-10 coding tool (Beta)")
 
 st.warning("Demo only. Do not enter real patient information.")
 users = {
-    "admin": "1234",
-    "katya": "2015",
-    "coder": "5678"
+    "demo": "demo123"
 }
 
 if "logged_in" not in st.session_state:
@@ -178,8 +180,14 @@ import os
 
 st.subheader("Audit History")
 
-if os.path.exists("history.csv"):
-    history = pd.read_csv("history.csv")
-    st.dataframe(history, use_container_width=True)
+# Restrict demo users
+if st.session_state.username == "demo":
+    st.warning("Audit history is disabled for demo users.")
 else:
-    st.info("No audit history saved yet.")
+    import os
+
+    if os.path.exists("history.csv"):
+        history = pd.read_csv("history.csv")
+        st.dataframe(history, use_container_width=True)
+    else:
+        st.write("No history yet.")
