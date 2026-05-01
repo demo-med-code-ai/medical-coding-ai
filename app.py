@@ -179,7 +179,9 @@ import os
 
 st.subheader("Early Access")
 
-email = st.text_input("Want full access? Leave your email:")
+st.warning("Limited beta access - early users will get discounted pricing.")
+
+email = st.text_input("Want full access to faster, more accurate coding? Join the beta:")
 
 if st.button("Request full access"):
     if email.strip() == "":
