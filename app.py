@@ -17,7 +17,6 @@ st.warning("Demo only. Do not enter real patient information.")
 users = {
     "demo": "demo123"
 }
-
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -177,6 +176,35 @@ if "results" in st.session_state:
            st.success("Review saved successfully.")
 
 import os
+
+st.subheader("Early Access")
+
+email = st.text_input("Want full access? Leave your email:")
+
+if st.button("Request full access"):
+    if email.strip() == "":
+        st.error("Please enter your email.")
+    else:
+        import pandas as pd
+        from datetime import datetime
+
+        data = {
+            "Email": email,
+            "User": st.session_state.username,
+            "Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+        df = pd.DataFrame([data])
+
+        try:
+            existing = pd.read_csv("access_requests.csv")
+            df = pd.concat([existing, df], ignore_index=True)
+        except:
+            pass
+
+        df.to_csv("access_requests.csv", index=False)
+
+        st.success("Request received. Thank you!")
 
 st.subheader("Audit History")
 
