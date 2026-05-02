@@ -90,6 +90,9 @@ code_rules = {
     "fatigue": ("R53.83", "Other fatigue", "Medium"),
     "dizziness": ("R42", "Dizziness and giddiness", "Medium"),
     "allergic rhinitis": ("J30.9", "Allergic rhinitis, unspecified", "Medium"),
+    "colles fracture": ("S52.531A", "Colles' fracture of right radius, initial encounter", "High"),
+    "distal radius fracture": ("S52.509A", "Unspecified fracture of lower end of radius", "High"),
+    "radius fracture": ("S52.90XA", "Fracture of unspecified radius", "Medium"),
 }
 
     
@@ -97,35 +100,49 @@ note = st.text_area("Enter clinical note:", height=200)
 
 if st.button("Suggest Codes"):
     if note:
-        candidate_labels = [
-            f"{code} - {desc}"
-            for keyword, (code, desc, conf) in code_rules.items()
-        ]
-
-        ai_result = ai_model(
-            note,
-            candidate_labels,
-            multi_label=True
-        )
-
+        note_lower = note.lower()
         results = []
 
-        for label, score in zip(ai_result["labels"], ai_result["scores"]):
-            if score >= 0.35:
-                parts = label.split(" - ")
-                code = parts[0]
-                desc = parts[1]
+        # Diabetes with polyneuropathy
+        if "polyneuropathy" in note_lower or "diabetic neuropathy" in note_lower:
+            results.append(("E11.42", "Type 2 diabetes mellitus with diabetic polyneuropathy", "High", 0.95))
 
-                if score >= 0.70:
-                    conf = "High"
-                else:
-                    conf = "Medium"
+        # Insulin use
+        if "insulin" in note_lower:
+            results.append(("Z79.4", "Long term (current) use of insulin", "High", 0.95))
 
-                results.append((code, desc, conf, round(score, 2)))
+        # Diabetic retinopathy
+        if "retinopathy" in note_lower:
+            results.append(("E11.329", "Type 2 diabetes mellitus with mild nonproliferative diabetic retinopathy", "High", 0.90))
 
-        results = results[:5]
-        
-        st.session_state.results = results
+        # Colles fracture
+        if "colles" in note_lower or "radius fracture" in note_lower:
+            results.append(("S52.531A", "Colles' fracture of right radius, initial encounter", "High", 0.95))
+
+        if "fracture" in note_lower and "radius" in note_lower:
+            results.append(("S52.90XA", "Fracture of unspecified radius", "Medium", 0.95))
+
+        if "diabetes" in note_lower:
+            results.append(("E11.9", "Type 2 diabetes mellitus without complications", "Medium", 0.80))
+
+        # AI fallback only if no rules matched
+        if len(results) == 0:
+            candidate_labels = [
+                f"{code} - {desc}"
+                for keyword, (code, desc, conf) in code_rules.items()
+            ]
+
+            ai_result = ai_model(note, candidate_labels, multi_label=True)
+
+            for label, score in zip(ai_result["labels"], ai_result["scores"]):
+                if score >= 0.25:
+                    parts = label.split(" - ")
+                    code = parts[0]
+                    desc = parts[1]
+                    conf = "High" if score >= 0.70 else "Medium"
+                    results.append((code, desc, conf, round(score, 2)))
+
+        st.session_state.results = results[:5]
         st.session_state.note = note
 
 if "results" in st.session_state:
@@ -140,11 +157,16 @@ if "results" in st.session_state:
     if "approved" not in st.session_state:
         st.session_state.approved = []
 
+    if "approved" not in st.session_state:
+        st.session_state.approved = []
+
     approved = st.multiselect(
                 "Select codes to approve:",
                 [f"{code} - {desc}" for code, desc, conf, score in results],
                 default=st.session_state.approved
             )    
+
+    st.session_state.approved = approved
 
     # Save selection so it doesn't disappear
     st.session_state.approved = approved
