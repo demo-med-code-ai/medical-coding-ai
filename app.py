@@ -173,7 +173,7 @@ if "results" in st.session_state:
     for code, desc, conf, score in results:
         st.write(f"{code} - {desc} ({conf}, AI score: {score})")
     
-    # KEEP selection persiste
+    # KEEP selection persistent
     if "approved" not in st.session_state:
         st.session_state.approved = []
 
@@ -202,7 +202,9 @@ if "results" in st.session_state:
                "User": st.session_state.username,
                "Note": st.session_state.note,
                "Approved Codes": ", ".join(approved),
-               "Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+               "Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+               "Total Suggestions": len(results),
+               "Total Approved": len(approved)
            }
               
            df = pd.DataFrame([data])
