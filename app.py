@@ -159,7 +159,7 @@ if st.button("Suggest Codes"):
     try:
         existing_usage = pd.read_csv("usage_log.csv")
         usage_df = pd.concat([existing_usage, usage_df], ignore_index=True)
-    excedpt:
+    except:
         pass
 
     usage_df.to_csv("usage_log.csv", index=False)
