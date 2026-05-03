@@ -145,6 +145,26 @@ if st.button("Suggest Codes"):
         st.session_state.results = results[:5]
         st.session_state.note = note
 
+    import pandas as pd
+    from datetime import datetime
+
+    usage_date = {
+        "User": st.session_state.username,
+        "Note": note,
+        "Suggested Codes": ", ".join([code for code, desc, conf, score in results[:5]]),
+        "Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    usage_df = pd.DateFrame([usage_date])
+
+    try:
+        existing_usage = pd.read_csv("usage_log.csv")
+        usage_df = pd.concat([existing_usage, usage_df], ignore_index=True)
+    excedpt:
+        pass
+
+    usage_df.to_csv("usage_log.csv", index=False)
+
+
 if "results" in st.session_state:
     results = st.session_state.results
 
@@ -243,3 +263,11 @@ else:
         st.dataframe(history, use_container_width=True)
     else:
         st.write("No history yet.")
+
+st.subheader("Usage Log")
+
+if os.path.exists("usage_log.csv"):
+    usage_log = pd.read_csv("usage_log.csv")
+    st.dataframe(usage_log, use_container_width=True)
+else:
+    st.info("No Usage yet.")
