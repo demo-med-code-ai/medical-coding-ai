@@ -154,7 +154,7 @@ if st.button("Suggest Codes"):
         "Suggested Codes": ", ".join([code for code, desc, conf, score in results[:5]]),
         "Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
-    usage_df = pd.DateFrame([usage_date])
+    usage_df = pd.Datarame([usage_date])
 
     try:
         existing_usage = pd.read_csv("usage_log.csv")
